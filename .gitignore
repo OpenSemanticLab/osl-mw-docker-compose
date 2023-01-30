@@ -1,0 +1,8 @@
+.env
+.directory
+backup/*
+blazegraph/data/*
+mediawiki/config/favicon.ico
+mediawiki/config/logo*
+mediawiki/data/*
+mysql/data/*
