@@ -1,6 +1,9 @@
 # osl-mw-docker-compose
 Docker Compose for Mediawiki + OpenSemanticLab
 
+Please note that this is currently a pure software stack without any content. 
+We will add content packages soon.
+
 ## Deploy
 
 Clone & init the repo
@@ -22,6 +25,8 @@ MW_SITE_LANG=en
 MW_TIME_ZONE=Europe/Berlin
 MW_ADMIN_PASS=change_me
 MW_DB_PASS=change_me
+MW_PAGE_PACKAGES=org.open-semantic-lab.core;org.open-semantic-lab.demo
+MW_AUTOIMPORT_PAGES=true
 
 MYSQL_HOST_PORT=3307
 MYSQL_ROOT_PASSWORD=change_me
