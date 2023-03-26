@@ -1,8 +1,17 @@
 # osl-mw-docker-compose
 Docker Compose for Mediawiki + OpenSemanticLab
 
-Please note that this is currently a pure software stack without any content. 
-We will add content packages soon.
+Please note: Content packages defined by MW_PAGE_PACKAGES will be install automatically.
+Optional packages listed [here](https://github.com/OpenSemanticLab/PagePackages/blob/main/package_index.txt) can be installed under `<your wiki domain>/wiki/Special:Packages`. Package sources are hosted [here](https://github.com/orgs/OpenSemanticWorld-Packages/repositories).
+To add additional optional packages, add 
+```
+$wgPageExchangePackageFiles[] = 'packages.json url';
+```
+e. g. 
+```
+$wgPageExchangePackageFiles[] = 'https://raw.githubusercontent.com/OpenSemanticWorld-Packages/world.opensemantic.meta.docs/main/packages.json';
+```
+to `mediawiki/config/CustomSettings.php`
 
 ## Deploy
 
