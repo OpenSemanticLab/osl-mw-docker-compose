@@ -23,6 +23,11 @@ cd osl-mw-docker-compose
 sudo chown -R www-data:www-data mediawiki/data
 ```
 
+Copy .env.example to .env
+```
+cp .env.example .env
+```
+
 Set the config parameters in .env
 
 Example:
@@ -45,6 +50,18 @@ DRAWIO_HOST_PORT=8082
 DRAWIO_SERVER=http://drawio:80
 
 GRAPHDB_HOST_PORT=9999
+```
+
+Optional partial overwrite of `docker-compose.yaml` with `docker-compose.override.yaml`, e. g.
+```yaml
+version: '3.8'
+
+services:
+    mediawiki:
+        volumes:
+            - ./mediawiki/config/logo.png:/var/www/html/w/logo.png
+            - ./mediawiki/config/logo.svg:/var/www/html/w/logo.svg
+            - ./mediawiki/extensions/MyCustomExtension:/var/www/html/w/extensions/MyCustomExtension
 ```
 
 Run
