@@ -30,7 +30,7 @@ services:
             - "${GRAPHDB_HOST_PORT}:9999"
 
     mediawiki:
-        image: opensemanticlab/osl-mw:main
+        image: opensemanticlab/osl-mw:dev-mw1.39
         restart: unless-stopped
         depends_on:
             - db
@@ -49,7 +49,7 @@ services:
             - MW_SITE_NAME=${MW_SITE_NAME}
             - MW_SITE_LANG=${MW_SITE_LANG}
             - MW_TIME_ZONE=${MW_TIME_ZONE}
-            - MW_DEFAULT_SKIN=timeless
+            - MW_DEFAULT_SKIN=Citizen
             - MW_ENABLE_UPLOADS=1
             - MW_USE_INSTANT_COMMONS=0
             - MW_ADMIN_USER=admin
@@ -80,7 +80,7 @@ services:
         restart: unless-stopped
 
     elasticsearch:
-        image: elasticsearch:6.5.4
+        image: docker.elastic.co/elasticsearch/elasticsearch:7.10.2
         restart: unless-stopped
         environment:
            - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
