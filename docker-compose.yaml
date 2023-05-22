@@ -30,7 +30,7 @@ services:
             - "${GRAPHDB_HOST_PORT}:9999"
 
     mediawiki:
-        image: opensemanticlab/osl-mw:dev-mw1.39
+        image: opensemanticlab/osl-mw:main
         restart: unless-stopped
         depends_on:
             - db
