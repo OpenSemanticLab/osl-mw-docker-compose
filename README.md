@@ -70,10 +70,12 @@ Run
 docker compose up
 ```
 
-Reset
+Depending on the size of the packages defined in `MW_PAGE_PACKAGES` it will take some time to install them in the background.
+
+## Reset
 
 ```bash
-docker compose down
-sudo rm -R mysql/data && sudo rm -R blazegraph/data && sudo rm -R mediawiki/data/
+docker compose down -v
+sudo rm -R mysql/data/* && sudo rm -R blazegraph/data/* && sudo rm -R mediawiki/data/*
 docker compose up
 ```
