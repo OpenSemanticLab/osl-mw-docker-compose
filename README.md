@@ -37,7 +37,7 @@ cp .env.example .env
 Set the config parameters in .env
 
 Example:
-```
+```env
 MW_HOST_PORT=8081
 MW_SITE_SERVER=http://localhost:80
 MW_SITE_NAME=Wiki
@@ -45,7 +45,11 @@ MW_SITE_LANG=en
 MW_TIME_ZONE=Europe/Berlin
 MW_ADMIN_PASS=change_me
 MW_DB_PASS=change_me
-MW_PAGE_PACKAGES=world.opensemantic.core;world.opensemantic.base;world.opensemantic.demo.common
+MW_PAGE_PACKAGES="
+world.opensemantic.core;
+world.opensemantic.base;
+world.opensemantic.demo.common;
+"
 MW_AUTOIMPORT_PAGES=true
 MW_AUTOBUILD_SITEMAP=false
 
@@ -73,17 +77,22 @@ services:
 
 ### Settings
 
-You can add or overwrite mediawiki settings by editing `mediawiki/config/CustomSettings.php`,
-e. g. to make your instance public readable add:
+You can add or overwrite mediawiki settings by editing `mediawiki/config/CustomSettings.php`.
+
+You need to re-run `docker compose up` to apply them
+
+#### Public Instance
+To make your instance public readable add:
 ```php
 ####### Make it public ########
 $wgGroupPermissions['*']['read'] = true;
 ```
 
+#### Addtional content packages
 Please note: Content packages defined by MW_PAGE_PACKAGES will be install automatically.
 Optional packages listed [here](https://github.com/OpenSemanticLab/PagePackages/blob/main/package_index.txt) can be installed under `<your wiki domain>/wiki/Special:Packages`. Package sources are hosted [here](https://github.com/orgs/OpenSemanticWorld-Packages/repositories).
 To add additional optional packages, add 
-```
+```php
 $wgPageExchangePackageFiles[] = 'packages.json url';
 ```
 e. g. 
@@ -91,6 +100,22 @@ e. g.
 $wgPageExchangePackageFiles[] = 'https://raw.githubusercontent.com/OpenSemanticWorld-Packages/world.opensemantic.meta.docs/main/packages.json';
 ```
 to `mediawiki/config/CustomSettings.php`
+
+#### Allow additional file uploads
+Insecure in public instances!
+
+Example:
+```php
+$additionalFileExtensions = [ 'py', 'exe' ];
+$wgFileExtensions = array_merge( $wgFileExtensions, $additionalFileExtensions );
+$wgProhibitedFileExtensions = array_diff( $wgProhibitedFileExtensions, $additionalFileExtensions );
+$wgMimeTypeExclusions = array_diff( $wgMimeTypeExclusions, [ 'application/x-msdownload' ]); # for .exe
+
+# allow any upload - insecure in public instances!
+# $wgStrictFileExtensions = false;
+# $wgCheckFileExtensions = false;
+# $wgVerifyMimeType = false;
+```
 
 ### Run
 
