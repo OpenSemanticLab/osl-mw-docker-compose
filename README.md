@@ -150,6 +150,15 @@ php /var/www/html/w/maintenance/refreshLinks.php
 php /var/www/html/w/maintenance/refreshImageMetadata.php --force
 ```
 
+- Large mysql binlog files (see https://askubuntu.com/questions/1322041/how-to-solve-increasing-size-of-mysql-binlog-files-problem)
+  - List and delete files
+```bash
+docker-compose exec db /bin/bash -c 'exec echo "SHOW BINARY LOGS;" | mysql -uroot -p"$MYSQL_ROOT_PASSWORD"'
+```
+```bash
+docker-compose exec db /bin/bash -c 'exec mysql -uroot -p"$MYSQL_ROOT_PASSWORD"'
+mysql> PURGE BINARY LOGS TO 'binlog.000123';
+```
 
 ## Backup
 ```bash
