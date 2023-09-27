@@ -125,6 +125,8 @@ docker compose up
 
 Depending on the size of the packages defined in `MW_PAGE_PACKAGES` it will take some time to install them in the background.
 
+You can now login (e. g. at http://localhost:8081/wiki/Main_Page) with user 'Admin' and the `MW_ADMIN_PASS` you set in the .env file.
+
 
 ## Maintenance
 
@@ -177,7 +179,7 @@ docker compose down -v
 sudo rm -R mysql/data/* && sudo rm -R blazegraph/data/* && sudo rm -R mediawiki/data/*
 docker compose up
 ```
-
+This is also required if you change the database passwords after the first run.
 
 ## Restore
 
