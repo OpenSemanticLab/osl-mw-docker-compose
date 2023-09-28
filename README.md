@@ -38,28 +38,29 @@ Set the config parameters in .env
 
 Example:
 ```env
-MW_HOST_PORT=8081
-MW_SITE_SERVER=http://localhost:80
-MW_SITE_NAME=Wiki
-MW_SITE_LANG=en
-MW_TIME_ZONE=Europe/Berlin
-MW_ADMIN_PASS=change_me123
-MW_DB_PASS=change_me123
+MW_HOST_PORT=8081 # the port mediawiki exposes on the host
+MW_SITE_SERVER=http://localhost:8081
+MW_SITE_NAME=Wiki # the name of your instance
+MW_SITE_LANG=en # the site language. Others than 'en' are not supported
+MW_TIME_ZONE=Europe/Berlin # your time zone
+MW_ADMIN_PASS=change_me123 # the password of the 'Admin' account
+MW_DB_PASS=change_me123 # the db password of the user 'mediawiki'
+# the packages to install (multi-line)
 MW_PAGE_PACKAGES="
 world.opensemantic.core;
 world.opensemantic.base;
 world.opensemantic.demo.common;
 "
-MW_AUTOIMPORT_PAGES=true
-MW_AUTOBUILD_SITEMAP=false
+MW_AUTOIMPORT_PAGES=true # if true, packages are installed / updated at start
+MW_AUTOBUILD_SITEMAP=false # if true, the sitemap is periodically build (exposes a page for public instances)
 
-MYSQL_HOST_PORT=3307
-MYSQL_ROOT_PASSWORD=change_me123
+MYSQL_HOST_PORT=3307 # the port mysql exposes on the host
+MYSQL_ROOT_PASSWORD=change_me123 # the password of the 'root' account
 
-DRAWIO_HOST_PORT=8082
-DRAWIO_SERVER=http://drawio:80
+DRAWIO_HOST_PORT=8082 # the port mysql exposes on the host
+DRAWIO_SERVER=http://localhost:8081 # the address under which drawio is reachable for the mediawiki container
 
-GRAPHDB_HOST_PORT=9999
+GRAPHDB_HOST_PORT=9999 # the port blazegraph exposes on the host
 ```
 
 Optional partial overwrite of `docker-compose.yaml` with `docker-compose.override.yaml`, e. g.
