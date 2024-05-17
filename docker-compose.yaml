@@ -3,7 +3,6 @@
 #   mkdir -p mediawiki/data && chown www-data:www-data mediawiki/data
 #   mkdir -p blazegraph/data
 
-version: '3.8'
 services:
     db:
         image: mysql:8.0.17
