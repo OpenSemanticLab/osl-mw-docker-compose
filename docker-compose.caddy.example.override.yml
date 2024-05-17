@@ -2,7 +2,6 @@
 # requires https://github.com/lucaslorentz/caddy-docker-proxy
 # and a existing docker network 'caddy'
 
-version: '3.8'
 services:
     mediawiki:
         networks:
