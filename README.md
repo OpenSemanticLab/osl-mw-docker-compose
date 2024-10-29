@@ -76,6 +76,16 @@ services:
 ```
 
 
+### Run
+
+```bash
+docker compose up
+```
+
+Depending on the size of the packages defined in `MW_PAGE_PACKAGES` it will take some time to install them in the background.
+
+You can now login (e. g. at http://localhost:8081/wiki/Main_Page) with user 'Admin' and the `MW_ADMIN_PASS` you set in the .env file.
+
 ### Settings
 
 You can add or overwrite mediawiki settings by editing `mediawiki/config/CustomSettings.php`.
@@ -118,15 +128,62 @@ $wgMimeTypeExclusions = array_diff( $wgMimeTypeExclusions, [ 'application/x-msdo
 # $wgVerifyMimeType = false;
 ```
 
-### Run
+#### Important page content
+If your instance is public, make sure to add a privacy policy to `/wiki/Site:Privacy_policy` and legal informations to `/wiki/Site:General_disclaimer`.
+You may also create a single page with all necessary informations and point with a redirect from other pages to it: `#REDIRECT [[Site:General_disclaimer]]`
 
-```bash
-docker compose up
+#### Email service
+If you don't have an email server yet (optional, but necessary for notification and password resets, etc.), you can use [docker-mailserver](https://github.com/docker-mailserver/docker-mailserver)
+
+#### Optional Extensions
+- wfLoadExtension( 'Widgets' );
+- wfLoadExtension( 'TwitterTag' ); # Not GDPR conform!
+- wfLoadExtension( 'WebDAV' ); # Allows access to uploaded files via WebDAV (e. g. directly with MS Word)
+- wfLoadExtension( 'RdfExport' ); # exposes an DCAT catalog at `/api.php?action=catalog&format=json&rdf_format=turtle` and allows OWL ontology export (use only in public instances, requires SPARQL-Store)
+
+#### SMW Store
+Currently the default is blazegraph as SPARQL-Store. Since blazegraph is no longer maintained we are transitioning to use Apache Jena Fuseki.
+To switch to Fuseke, add the following settings to your CustomSettings.php file:
+```php
+$smwgSparqlRepositoryConnector = 'fuseki';
+$smwgSparqlEndpoint["query"] = 'http://fuseki:3030/ds/sparql';
+$smwgSparqlEndpoint["update"] = 'http://fuseki:3030/ds/update';
 ```
 
-Depending on the size of the packages defined in `MW_PAGE_PACKAGES` it will take some time to install them in the background.
+and run the stack with
+```bash
+docker compose --profile fuseki up
+```
 
-You can now login (e. g. at http://localhost:8081/wiki/Main_Page) with user 'Admin' and the `MW_ADMIN_PASS` you set in the .env file.
+Note: A full data rebuild is required to populate the new store.
+
+to run include sparklis SPARQL editor, run
+```bash
+docker compose --profile fuseki --profile sparklis up
+```
+or
+```bash
+COMPOSE_PROFILES=fuseki,sparklis docker compose up
+```
+
+If you do not need a SPARQL endpoint, you can switch to SMWElasticStore by reusing the elasticsearch container:
+```php
+$smwgDefaultStore = 'SMWElasticStore';
+$smwgElasticsearchEndpoints = [
+    [
+        'host' => 'elasticsearch',
+        'port' => 9200,
+        'scheme' => 'http'
+    ]
+];
+```
+
+Note: Switch store types requires to re-setup the store.
+```bash
+php /var/www/html/w/extensions/SemanticMediaWiki/maintenance/setupStore.php
+php /var/www/html/w/extensions/SemanticMediaWiki/maintenance/rebuildElasticIndex.php
+php /var/www/html/w/extensions/SemanticMediaWiki/maintenance/rebuildData.php
+```
 
 
 ## Maintenance
