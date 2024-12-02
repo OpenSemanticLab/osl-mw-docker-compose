@@ -143,7 +143,7 @@ If you don't have an email server yet (optional, but necessary for notification 
 
 #### SMW Store
 Currently the default is blazegraph as SPARQL-Store. Since blazegraph is no longer maintained we are transitioning to use Apache Jena Fuseki.
-To switch to Fuseke, add the following settings to your CustomSettings.php file:
+To switch to Fuseki, add the following settings to your CustomSettings.php file:
 ```php
 $smwgSparqlRepositoryConnector = 'fuseki';
 $smwgSparqlEndpoint["query"] = 'http://fuseki:3030/ds/sparql';
@@ -188,6 +188,7 @@ php /var/www/html/w/extensions/SemanticMediaWiki/maintenance/rebuildData.php
 
 ## Maintenance
 
+### Mediawiki
 Run the following commands inside the mediawiki container if you run in one of the following problems
 
 - missing semantic properties after backup restore
@@ -210,14 +211,43 @@ php /var/www/html/w/maintenance/refreshLinks.php
 php /var/www/html/w/maintenance/refreshImageMetadata.php --force
 ```
 
-- Large mysql binlog files (see https://askubuntu.com/questions/1322041/how-to-solve-increasing-size-of-mysql-binlog-files-problem)
-  - List and delete files
+### MySQL
+Large mysql binlog files (see https://askubuntu.com/questions/1322041/how-to-solve-increasing-size-of-mysql-binlog-files-problem)
+
+List files
 ```bash
 docker-compose exec db /bin/bash -c 'exec echo "SHOW BINARY LOGS;" | mysql -uroot -p"$MYSQL_ROOT_PASSWORD"'
 ```
+
+Delete files
 ```bash
 docker-compose exec db /bin/bash -c 'exec mysql -uroot -p"$MYSQL_ROOT_PASSWORD"'
 mysql> PURGE BINARY LOGS TO 'binlog.000123';
+```
+
+### Docker
+Docker log file size is unlimited in the default settings, see
+https://stackoverflow.com/questions/42510002/docker-how-to-clear-the-logs-properly-for-a-docker-container
+ 
+To inspect the file size, run
+```bash
+du -sh --  /var/lib/docker/containers/*/*-json.log
+```
+
+To reset those file (remove all content), run
+```bash
+truncate -s 0 /var/lib/docker/containers/**/*-json.log
+```
+
+To change the setting, adapt `/etc/docker/daemon.json`
+```json
+{
+  "log-driver": "json-file",
+  "log-opts": {
+    "max-size": "1g",
+    "max-file": "1"
+  }
+}
 ```
 
 ## Backup
