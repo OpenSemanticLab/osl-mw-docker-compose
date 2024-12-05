@@ -112,6 +112,13 @@ $wgPageExchangePackageFiles[] = 'https://raw.githubusercontent.com/OpenSemanticW
 ```
 to `mediawiki/config/CustomSettings.php`
 
+In order to add multiple packages that are listed in an index file, add it to the config as follows:
+```php
+$wgPageExchangeFileDirectories[] = 'https://raw.githubusercontent.com/<MyOrg>/PagePackages/refs/heads/main/package_index.txt';
+```
+
+In all cases additional packages are now __available__ for installation. Use `<your wiki domain>/wiki/Special:Packages` or the API to actually install them (more information see [Extension:Page_Exchange](https://www.mediawiki.org/wiki/Extension:Page_Exchange)).
+
 #### Allow additional file uploads
 Insecure in public instances!
 
