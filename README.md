@@ -1,10 +1,37 @@
-# osl-mw-docker-compose
-Docker Compose for Mediawiki + OpenSemanticLab
+# OpenSemanticLab Mediawiki Docker Compose
 
+Docker Compose setup for OpenSemanticLab utilizing Semantic MediaWiki functionality. This guide will walk you through the prerequisites, deployment steps, maintenance procedures, and management of database volumes.
 
-## Deploy
+## Table of Contents <!-- omit in toc -->
 
-### Prerequisites 
+- [OpenSemanticLab Mediawiki Docker Compose](#opensemanticlab-mediawiki-docker-compose)
+  - [Prerequisites](#prerequisites)
+    - [System](#system)
+    - [Clone](#clone)
+  - [Deploy](#deploy)
+    - [Config](#config)
+    - [Run](#run)
+    - [Settings](#settings)
+      - [Public Instance](#public-instance)
+      - [Addtional content packages](#addtional-content-packages)
+      - [Allow additional file uploads](#allow-additional-file-uploads)
+      - [Important page content](#important-page-content)
+      - [Email service](#email-service)
+      - [Optional Extensions](#optional-extensions)
+  - [Maintenance](#maintenance)
+    - [Mediawiki](#mediawiki)
+    - [MySQL](#mysql)
+      - [List SQL log files](#list-sql-log-files)
+      - [Delete SQL log files](#delete-sql-log-files)
+    - [Docker Log Files](#docker-log-files)
+    - [Persistent Database Volumes](#persistent-database-volumes)
+      - [Backup](#backup)
+      - [Reset](#reset)
+      - [Restore](#restore)
+
+## Prerequisites
+
+### System
 
 Required
 
@@ -12,107 +39,79 @@ Required
 - [Git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
 
 Optional
+
 - [Nginx](https://docs.nginx.com/nginx/admin-guide/installing-nginx/installing-nginx-open-source/) for SSL Termination
 - [Certbot](https://certbot.eff.org/instructions) to create SSL/TSL certs with [Let’s Encrypt](https://letsencrypt.org)
 
-  
 ### Clone
 
-Clone & init the repo
+Clone this repository on branch `main` for AMD64 architecture
 
 ```bash
 git clone https://github.com/OpenSemanticLab/osl-mw-docker-compose
-cd osl-mw-docker-compose
-sudo chown -R www-data:www-data mediawiki/data
 ```
 
+or clone branch `arm64` for ARM64 architecture
+
+```bash
+git clone -b arm64 https://github.com/OpenSemanticLab/osl-mw-docker-compose
+```
+
+## Deploy
 
 ### Config
 
-Copy .env.example to .env
-```
+Copy .env.example to ``.env``
+
+```bash
 cp .env.example .env
 ```
 
-Set the config parameters in .env
-
-Example:
-```env
-MW_HOST_PORT=8081 # the port mediawiki exposes on the host
-MW_SITE_SERVER=http://localhost:8081
-MW_SITE_NAME=Wiki # the name of your instance
-MW_SITE_LANG=en # the site language. Others than 'en' are not supported
-MW_TIME_ZONE=Europe/Berlin # your time zone
-MW_ADMIN_PASS=change_me123 # the password of the 'Admin' account
-MW_DB_PASS=change_me123 # the db password of the user 'mediawiki'
-# the packages to install (multi-line)
-MW_PAGE_PACKAGES="
-world.opensemantic.core;
-world.opensemantic.base;
-world.opensemantic.demo.common;
-"
-MW_AUTOIMPORT_PAGES=true # if true, packages are installed / updated at start
-MW_AUTOBUILD_SITEMAP=false # if true, the sitemap is periodically build (exposes a page for public instances)
-
-MYSQL_HOST_PORT=3307 # the port mysql exposes on the host
-MYSQL_ROOT_PASSWORD=change_me123 # the password of the 'root' account
-
-DRAWIO_HOST_PORT=8082 # the port mysql exposes on the host
-DRAWIO_SERVER=http://localhost:8081 # the address under which drawio is reachable for the mediawiki container
-
-GRAPHDB_HOST_PORT=9999 # the port blazegraph exposes on the host
-```
-
-Optional partial overwrite of `docker-compose.yaml` with `docker-compose.override.yaml`, e. g.
-```yaml
-version: '3.8'
-
-services:
-    mediawiki:
-        volumes:
-            - ./mediawiki/config/logo.png:/var/www/html/w/logo.png
-            - ./mediawiki/config/logo.svg:/var/www/html/w/logo.svg
-            - ./mediawiki/extensions/MyCustomExtension:/var/www/html/w/extensions/MyCustomExtension
-```
-
+> Set the config parameters in ``.env``, at least ADMIN_PASS!
 
 ### Run
 
 ```bash
-docker compose up
+docker compose up -d ; docker compose logs -f
 ```
 
-Depending on the size of the packages defined in `MW_PAGE_PACKAGES` it will take some time to install them in the background.
-
-You can now login (e. g. at http://localhost:8081/wiki/Main_Page) with user 'Admin' and the `MW_ADMIN_PASS` you set in the .env file.
+> Depending on the size of the packages defined in `MW_PAGE_PACKAGES` it will take a few minutes to install them in the background.
+> When using defaults in ``.env`` you can access OpenSemanticLab on [http://localhost:8081/wiki/Main_Page](http://localhost:8081/wiki/Main_Page) with user ``Admin`` and the password set in the ``.env`` file in previous step.
 
 ### Settings
 
-You can add or overwrite mediawiki settings by editing `mediawiki/config/CustomSettings.php`.
-
-You need to re-run `docker compose up` to apply them
+Mediawiki settings can be overwritten by editing [CustomSettings.php](./mediawiki/config/CustomSettings.php). To apply the changes, simply run ``docker compose up -d`` again.
 
 #### Public Instance
-To make your instance public readable add:
+
+To make your instance public readable add the following lines to [CustomSettings.php](./mediawiki/config/CustomSettings.php):
+
 ```php
 ####### Make it public ########
 $wgGroupPermissions['*']['read'] = true;
 ```
 
 #### Addtional content packages
+
 Please note: Content packages defined by MW_PAGE_PACKAGES will be install automatically.
-Optional packages listed [here](https://github.com/OpenSemanticLab/PagePackages/blob/main/package_index.txt) can be installed under `<your wiki domain>/wiki/Special:Packages`. Package sources are hosted [here](https://github.com/orgs/OpenSemanticWorld-Packages/repositories).
-To add additional optional packages, add 
+Optional packages listed on [OSL GitHub PagePackages](https://github.com/OpenSemanticLab/PagePackages/blob/main/package_index.txt) and can be installed using `<your wiki domain>/wiki/Special:Packages`. Package sources are hosted on [OSW GitHub repositories](https://github.com/orgs/OpenSemanticWorld-Packages/repositories).
+
+To add additional optional packages, add
+
 ```php
 $wgPageExchangePackageFiles[] = 'packages.json url';
 ```
-e. g. 
-```
+
+e.g.
+
+```php
 $wgPageExchangePackageFiles[] = 'https://raw.githubusercontent.com/OpenSemanticWorld-Packages/world.opensemantic.meta.docs/main/packages.json';
 ```
+
 to `mediawiki/config/CustomSettings.php`
 
 In order to add multiple packages that are listed in an index file, add it to the config as follows:
+
 ```php
 $wgPageExchangeFileDirectories[] = 'https://raw.githubusercontent.com/<MyOrg>/PagePackages/refs/heads/main/package_index.txt';
 ```
@@ -120,9 +119,11 @@ $wgPageExchangeFileDirectories[] = 'https://raw.githubusercontent.com/<MyOrg>/Pa
 In all cases additional packages are now __available__ for installation. Use `<your wiki domain>/wiki/Special:Packages` or the API to actually install them (more information see [Extension:Page_Exchange](https://www.mediawiki.org/wiki/Extension:Page_Exchange)).
 
 #### Allow additional file uploads
+
 Insecure in public instances!
 
 Example:
+
 ```php
 $additionalFileExtensions = [ 'py', 'exe' ];
 $wgFileExtensions = array_merge( $wgFileExtensions, $additionalFileExtensions );
@@ -136,117 +137,86 @@ $wgMimeTypeExclusions = array_diff( $wgMimeTypeExclusions, [ 'application/x-msdo
 ```
 
 #### Important page content
+
 If your instance is public, make sure to add a privacy policy to `/wiki/Site:Privacy_policy` and legal informations to `/wiki/Site:General_disclaimer`.
 You may also create a single page with all necessary informations and point with a redirect from other pages to it: `#REDIRECT [[Site:General_disclaimer]]`
 
 #### Email service
+
 If you don't have an email server yet (optional, but necessary for notification and password resets, etc.), you can use [docker-mailserver](https://github.com/docker-mailserver/docker-mailserver)
 
 #### Optional Extensions
+
 - wfLoadExtension( 'Widgets' );
 - wfLoadExtension( 'TwitterTag' ); # Not GDPR conform!
 - wfLoadExtension( 'WebDAV' ); # Allows access to uploaded files via WebDAV (e. g. directly with MS Word)
 - wfLoadExtension( 'RdfExport' ); # exposes an DCAT catalog at `/api.php?action=catalog&format=json&rdf_format=turtle` and allows OWL ontology export (use only in public instances, requires SPARQL-Store)
 
-#### SMW Store
-Currently the default is blazegraph as SPARQL-Store. Since blazegraph is no longer maintained we are transitioning to use Apache Jena Fuseki.
-To switch to Fuseki, add the following settings to your CustomSettings.php file:
-```php
-$smwgSparqlRepositoryConnector = 'fuseki';
-$smwgSparqlEndpoint["query"] = 'http://fuseki:3030/ds/sparql';
-$smwgSparqlEndpoint["update"] = 'http://fuseki:3030/ds/update';
-```
-
-and run the stack with
-```bash
-docker compose --profile fuseki up
-```
-
-Note: A full data rebuild is required to populate the new store.
-
-to run include sparklis SPARQL editor, run
-```bash
-docker compose --profile fuseki --profile sparklis up
-```
-or
-```bash
-COMPOSE_PROFILES=fuseki,sparklis docker compose up
-```
-
-If you do not need a SPARQL endpoint, you can switch to SMWElasticStore by reusing the elasticsearch container:
-```php
-$smwgDefaultStore = 'SMWElasticStore';
-$smwgElasticsearchEndpoints = [
-    [
-        'host' => 'elasticsearch',
-        'port' => 9200,
-        'scheme' => 'http'
-    ]
-];
-```
-
-Note: Switch store types requires to re-setup the store.
-```bash
-php /var/www/html/w/extensions/SemanticMediaWiki/maintenance/setupStore.php
-php /var/www/html/w/extensions/SemanticMediaWiki/maintenance/rebuildElasticIndex.php
-php /var/www/html/w/extensions/SemanticMediaWiki/maintenance/rebuildData.php
-```
-
-
 ## Maintenance
 
 ### Mediawiki
+
 Run the following commands inside the mediawiki container if you run in one of the following problems
 
 - missing semantic properties after backup restore
-```bash
-php /var/www/html/w/extensions/SemanticMediaWiki/maintenance/rebuildData.php
-```
+
+    ```bash
+    php /var/www/html/w/extensions/SemanticMediaWiki/maintenance/rebuildData.php
+    ```
 
 - no search results after backup restore
-```bash
-php /var/www/html/w/extensions/CirrusSearch/maintenance/ForceSearchIndex.php
-```
+
+    ```bash
+    php /var/www/html/w/extensions/CirrusSearch/maintenance/ForceSearchIndex.php
+    ```
 
 - incorrect link labels (page name instead of display name) after template changes or large imports
-```bash
-php /var/www/html/w/maintenance/refreshLinks.php
-```
+
+    ```bash
+    php /var/www/html/w/maintenance/refreshLinks.php
+    ```
 
 - missing thumbnails for tif images
-```bash
-php /var/www/html/w/maintenance/refreshImageMetadata.php --force
-```
+
+    ```bash
+    php /var/www/html/w/maintenance/refreshImageMetadata.php --force
+    ```
 
 ### MySQL
-Large mysql binlog files (see https://askubuntu.com/questions/1322041/how-to-solve-increasing-size-of-mysql-binlog-files-problem)
 
-List files
+Large mysql binlog files, [see Askubuntu.](https://askubuntu.com/questions/1322041/how-to-solve-increasing-size-of-mysql-binlog-files-problem)
+
+#### List SQL log files
+
 ```bash
-docker-compose exec db /bin/bash -c 'exec echo "SHOW BINARY LOGS;" | mysql -uroot -p"$MYSQL_ROOT_PASSWORD"'
+docker compose exec db /bin/bash -c 'exec echo "SHOW BINARY LOGS;" | mysql -uroot -p"$MYSQL_ROOT_PASSWORD"'
 ```
 
-Delete files
+#### Delete SQL log files
+
 ```bash
-docker-compose exec db /bin/bash -c 'exec mysql -uroot -p"$MYSQL_ROOT_PASSWORD"'
+docker compose exec db /bin/bash -c 'exec mysql -uroot -p"$MYSQL_ROOT_PASSWORD"'
 mysql> PURGE BINARY LOGS TO 'binlog.000123';
 ```
 
-### Docker
-Docker log file size is unlimited in the default settings, see
-https://stackoverflow.com/questions/42510002/docker-how-to-clear-the-logs-properly-for-a-docker-container
- 
+### Docker Log Files
+
+Docker log file size is unlimited in the default settings, [see Stackoverflow.](https://stackoverflow.com/questions/42510002/docker-how-to-clear-the-logs-properly-for-a-docker-container)
+
 To inspect the file size, run
+
 ```bash
 du -sh --  /var/lib/docker/containers/*/*-json.log
 ```
 
 To reset those file (remove all content), run
+
 ```bash
 truncate -s 0 /var/lib/docker/containers/**/*-json.log
 ```
 
 To change the setting, adapt `/etc/docker/daemon.json`
+
 ```json
 {
   "log-driver": "json-file",
@@ -257,29 +227,33 @@ To change the setting, adapt `/etc/docker/daemon.json`
 }
 ```
 
-## Backup
+### Persistent Database Volumes
+
+#### Backup
+
+To create a dump of the database volumes, run
+
 ```bash
-mkdir backup
-docker-compose exec db /bin/bash -c 'mysqldump --all-databases -uroot -p"$MYSQL_ROOT_PASSWORD" 2>/dev/null | gzip | base64 -w 0' | base64 -d > backup/db_backup_$(date +"%Y%m%d_%H%M%S").sql.gz
-tar -zcf backup/file_backup_$(date +"%Y%m%d_%H%M%S").tar mediawiki/data
+docker compose exec db /bin/bash -c 'mysqldump --all-databases -uroot -p"$MYSQL_ROOT_PASSWORD" 2>/dev/null | gzip | base64 -w 0' | base64 -d > backup/db_backup_$(date +"%Y%m%d_%H%M%S").sql.gz
 ```
 
+#### Reset
 
-## Reset
-
-To reset your instance and destroy all data run
+To reset your instance and clear all data, run:
 
 ```bash
 docker compose down -v
 sudo rm -R mysql/data/* && sudo rm -R blazegraph/data/* && sudo rm -R mediawiki/data/*
 docker compose up
 ```
-This is also required if you change the database passwords after the first run.
 
-## Restore
+> This is also required if you change the database passwords after the first run.
+
+#### Restore
 
 reset your instance first then import your backup
 (get your container name, e. g. `docker-compose-osl-wiki_db_1`, with `docker ps -a`)
+
 ```bash
 zcat backup/db_backup_<date>.sql.gz | docker exec -i <container> sh -c 'exec mysql -uroot -p"$MYSQL_ROOT_PASSWORD"'
 tar -xf backup/file_backup_<date>.tar
