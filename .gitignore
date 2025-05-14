@@ -1,6 +1,6 @@
 .env
 .directory
-backup/*
+# backup/*
 blazegraph/data/*
 mediawiki/config/favicon.ico
 mediawiki/config/logo*
