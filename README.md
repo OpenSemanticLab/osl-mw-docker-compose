@@ -1,19 +1,33 @@
 # osl-mw-docker-compose
 Docker Compose for Mediawiki + OpenSemanticLab
 
-
 ## Deploy
+
+### Hardware Requirements
+
+Minimal Setup
+- 4 CPUs ( > 2 GHz)
+- 4GB RAM
+- 50 GB HDD
+
+Recommended:
+- 8 CPUs,
+- 8 GB RAM
+- 100 GB SSD
+
+OS: Any OS with support for Docker, e.g. Ubuntu in it'S current LTS version (24.04.3)
 
 ### Prerequisites 
 
 Required
-
 - [Docker](https://docs.docker.com/engine/install/)
+
+Recommended to follow instructions:
 - [Git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
 
-Optional
-- [Nginx](https://docs.nginx.com/nginx/admin-guide/installing-nginx/installing-nginx-open-source/) for SSL Termination
-- [Certbot](https://certbot.eff.org/instructions) to create SSL/TSL certs with [Let’s Encrypt](https://letsencrypt.org)
+Optional SSL Termination
+- [Nginx](https://docs.nginx.com/nginx/admin-guide/installing-nginx/installing-nginx-open-source/) for SSL Termination + [Certbot](https://certbot.eff.org/instructions) to create SSL/TSL certs with [Let’s Encrypt](https://letsencrypt.org)
+- or (recommended) [caddy-docker-proxy](https://github.com/opensemanticworld/caddy-docker-proxy) as integrated service, example config see `docker-compose.caddy.example.override.yml`
 
   
 ### Clone
