@@ -113,6 +113,38 @@ To make your instance public readable add:
 $wgGroupPermissions['*']['read'] = true;
 ```
 
+#### Permission management
+Default settings allow only members of the `sysadmin` group to delete pages.
+```php
+# allow every user to delete pages
+$wgGroupPermissions['user']['delete'] = true;
+```
+Please note that deleted pages are still available in the pages archive.
+
+Further settings and custom groups can also be defined, see [Manual:User_rights](https://www.mediawiki.org/wiki/Manual:User_rights). Example:
+```php
+// revoke edit-right for standard users
+$wgGroupPermissions['user']['edit'] = false;
+$wgGroupPermissions['sysop']['edit'] = true;
+
+$wgGroupPermissions['active-user'] = $wgGroupPermissions['user'];
+// grant edit-right and delete-right for custom-group
+$wgGroupPermissions['custom-group']['edit'] = true;
+$wgGroupPermissions['custom-group']['delete'] = true;
+```
+
+Pages installed via packages are default only editable for sysadmin. Custom schemas in the namespace `Category` can be further restricted by
+```php
+// create schema-edit right
+$wgAvailableRights[] = 'schema-edit';
+// grant it to custom-group and sysop
+$wgGroupPermissions['custom-group']['schema-edit'] = true;
+$wgGroupPermissions['sysop']['schema-edit'] = true;
+
+// restrict the creation of new categories outside installed packages 
+$wgNamespaceProtection[NS_CATEGORY] = ['schema-edit'];
+```
+
 #### Addtional content packages
 Please note: Content packages defined by MW_PAGE_PACKAGES will be install automatically.
 Optional packages listed [here](https://github.com/OpenSemanticLab/PagePackages/blob/main/package_index.txt) can be installed under `<your wiki domain>/wiki/Special:Packages`. Package sources are hosted [here](https://github.com/orgs/OpenSemanticWorld-Packages/repositories).
