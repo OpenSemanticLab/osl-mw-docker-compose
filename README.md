@@ -264,6 +264,14 @@ php /var/www/html/w/maintenance/refreshLinks.php
 php /var/www/html/w/maintenance/refreshImageMetadata.php --force
 ```
 
+- Error when deleting a file
+`Error deleting file: Could not create directory "metastore/local-backend/local-deleted/v1/"`
+
+Fix the permission on the host
+```bash
+sudo chown -R www-data:www-data mediawiki/data 
+```
+
 ### MySQL
 Large mysql binlog files (see https://askubuntu.com/questions/1322041/how-to-solve-increasing-size-of-mysql-binlog-files-problem)
 
