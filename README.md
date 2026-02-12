@@ -163,6 +163,14 @@ In order to add multiple packages that are listed in an index file, add it to th
 $wgPageExchangeFileDirectories[] = 'https://raw.githubusercontent.com/<MyOrg>/PagePackages/refs/heads/main/package_index.txt';
 ```
 
+For private repos generate a Github private repo access token with permission "Content" (read)
+```php
+$wgPageExchangeGitHubAccessToken = [
+    '<MyOrg>' => 'github_pat_...', # org-level
+    '<MyOrg>/'<repo>' => 'github_pat_...', # repo-level
+];
+```
+
 In all cases additional packages are now __available__ for installation. Use `<your wiki domain>/wiki/Special:Packages` or the API to actually install them (more information see [Extension:Page_Exchange](https://www.mediawiki.org/wiki/Extension:Page_Exchange)).
 
 #### Allow additional file uploads
