@@ -1,4 +1,8 @@
 # osl-mw-docker-compose
+
+> [!IMPORTANT]
+> This repository has been merged into [docker-compose-osl-wiki](https://github.com/OpenSemanticLab/docker-compose-osl-wiki) and is now **archived**. Please use [docker-compose-osl-wiki](https://github.com/OpenSemanticLab/docker-compose-osl-wiki) for both deployment and development.
+
 Docker Compose for Mediawiki + OpenSemanticLab
 
 ## Deploy
